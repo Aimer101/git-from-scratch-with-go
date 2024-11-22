@@ -134,6 +134,24 @@ func main() {
 			fmt.Println(entry.Name)
 		}
 
+	case "write-tree":
+		currentDir, err := os.Getwd()
+
+		if err != nil {
+			fmt.Println("Error getting current directory:", err)
+			os.Exit(1)
+
+		}
+
+		hash, err := helper.WriteTree(currentDir)
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Println(hash)
+
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
 		os.Exit(1)
