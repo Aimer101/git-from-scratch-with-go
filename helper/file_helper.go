@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"time"
 )
 
 func CompressIntoFile(file *os.File, body []byte) error {
@@ -62,6 +63,50 @@ func WriteIntoPath(path string, filename string, body []byte) error {
 	}
 
 	return nil
+}
+
+// tree {treeSHa}
+// parent {parentCommitSHA}
+// author {author} <{email}> {currentUnixTime} {timezone}
+// committer {author} <{email}> {currentUnixTime} {timezone}
+
+// {commitMessage}
+func CommitTree(treeSHA string, parentCommitSHA string, commitMessage string) (string, error) {
+	author := "Foo bar"
+	email := "foo@example.com"
+	currentUnixTime := time.Now().Unix()
+	timezone, _ := time.Now().Local().Zone()
+
+	content := fmt.Sprintf("tree %s\nparent %s\nauthor %s <%s> %d %s\ncommitter %s <%s> %d %s\n\n%s\n",
+		treeSHA,
+		parentCommitSHA,
+		author,
+		email,
+		currentUnixTime,
+		timezone,
+		author,
+		email,
+		currentUnixTime,
+		timezone,
+		commitMessage,
+	)
+
+	header := fmt.Sprintf("commit %d\000", len(content))
+	fullContent := append([]byte(header), []byte(content)...)
+
+	hash := sha1.Sum([]byte(fullContent))
+
+	hashHex := hex.EncodeToString(hash[:])
+
+	objectPath := filepath.Join(".git/objects", hashHex[:2])
+	err := WriteIntoPath(objectPath, hashHex[2:], []byte(fullContent))
+
+	if err != nil {
+		return "", err
+	}
+
+	return hashHex, nil
+
 }
 
 // tree format is

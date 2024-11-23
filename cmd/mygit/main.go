@@ -152,6 +152,20 @@ func main() {
 
 		fmt.Println(hash)
 
+	case "commit-tree":
+		treeSHA := os.Args[2]
+		parentCommitSHA := os.Args[4]
+		commitMessage := os.Args[6]
+
+		hash, err := helper.CommitTree(treeSHA, parentCommitSHA, commitMessage)
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Println(hash)
+
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
 		os.Exit(1)
