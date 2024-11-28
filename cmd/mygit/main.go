@@ -19,16 +19,7 @@ func main() {
 
 	switch command := os.Args[1]; command {
 	case "init":
-		for _, dir := range []string{".git", ".git/objects", ".git/refs"} {
-			if err := os.MkdirAll(dir, 0755); err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating directory: %s\n", err)
-			}
-		}
-		headFileContents := []byte("ref: refs/heads/main\n")
-		if err := os.WriteFile(".git/HEAD", headFileContents, 0644); err != nil {
-			fmt.Fprintf(os.Stderr, "Error writing file: %s\n", err)
-		}
-		fmt.Println("Initialized git directory")
+		helper.InitialiseGitDirectory()
 
 	case "cat-file":
 		sha := os.Args[3]
@@ -165,6 +156,15 @@ func main() {
 		}
 
 		fmt.Println(hash)
+
+	case "clone":
+		repoUrl := os.Args[2]
+		dir := os.Args[3]
+
+		fmt.Println("repo url", repoUrl)
+		fmt.Println("dir", dir)
+
+		CloneRepo(repoUrl, dir)
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)

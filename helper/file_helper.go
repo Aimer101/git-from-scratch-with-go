@@ -16,7 +16,7 @@ func CompressIntoFile(file *os.File, body []byte) error {
 	w := zlib.NewWriter(file)
 	_, err := w.Write(body)
 	if err != nil {
-		return fmt.Errorf("error writing to gzip writer: %v", err)
+		return fmt.Errorf("error writing to zlip writer: %v", err)
 	}
 
 	w.Close()
@@ -69,7 +69,6 @@ func WriteIntoPath(path string, filename string, body []byte) error {
 // parent {parentCommitSHA}
 // author {author} <{email}> {currentUnixTime} {timezone}
 // committer {author} <{email}> {currentUnixTime} {timezone}
-
 // {commitMessage}
 func CommitTree(treeSHA string, parentCommitSHA string, commitMessage string) (string, error) {
 	author := "Foo bar"
@@ -220,5 +219,19 @@ func writeBlob(path string) (string, error) {
 	}
 
 	return hashHex, nil
+
+}
+
+func InitialiseGitDirectory() {
+	for _, dir := range []string{".git", ".git/objects", ".git/refs"} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			fmt.Fprintf(os.Stderr, "Error creating directory: %s\n", err)
+		}
+	}
+	headFileContents := []byte("ref: refs/heads/main\n")
+	if err := os.WriteFile(".git/HEAD", headFileContents, 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "Error writing file: %s\n", err)
+	}
+	fmt.Println("Initialized git directory")
 
 }
